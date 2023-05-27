@@ -1,0 +1,39 @@
+﻿@using Cine.Shared.Entities;
+@using Cine.Web.Repositories;
+@page "/pelicula/create/{GeneroId:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Crear Estado/Departamento</h3>
+
+<PeliculaForm @ref="peliculaForm" pelicula="pelicula" OnValidSubmit="CreateAsync" ReturnAction="Return" />
+
+@code {
+    private Pelicula pelicula = new();
+    private PeliculaForm? peliculaForm;
+
+    [Parameter]
+    public int GeneroId { get; set; }
+
+    private async Task CreateAsync()
+    {
+
+        pelicula.GeneroId = GeneroId;
+        var httpResponse = await repository.Post("/api/pelicula", pelicula);
+        if (httpResponse.Error)
+        {
+            var message = await httpResponse.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        Return();
+    }
+
+    private void Return()
+    {
+        peliculaForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo($"/genero/details/{GeneroId}");
+    }
+}

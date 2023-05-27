@@ -1,0 +1,66 @@
+﻿@using Cine.Shared.Entities;
+@page "/pelicula/edit/{PeliculaId:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+@using System.Net;
+@using Cine.Web.Repositories;
+
+
+<h3>Editar Pelicula</h3>
+
+@if (pelicula is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <PeliculaForm @ref="peliculaForm" pelicula="pelicula" OnValidSubmit="EditAsync" ReturnAction="Return" />
+}
+
+@code {
+    private Pelicula? pelicula;
+    private PeliculaForm? peliculaForm;
+
+    [Parameter]
+    public int PeliculaId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var responseHttp = await repository.Get<Pelicula>($"/api/pelicula/{PeliculaId}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/genero");
+                return;
+            }
+
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        pelicula = responseHttp.Response;
+    }
+
+    private async Task EditAsync()
+    {
+        var responseHttp = await repository.Put("/api/pelicula", pelicula);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        Return();
+    }
+
+    private void Return()
+    {
+        peliculaForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo($"/Genero/details/{pelicula!.GeneroId}");
+    }
+}

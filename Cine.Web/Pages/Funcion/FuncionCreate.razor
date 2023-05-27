@@ -1,0 +1,39 @@
+﻿@page "/funciones/create/{PeliculaId:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+@using Cine.Web.Repositories;
+@using Cine.Shared.Entities;
+
+
+<h3>Crear Funcion</h3>
+
+<FuncionForm @ref="funcionForm" funcion="funcion" OnValidSubmit="CreateAsync" ReturnAction="Return" />
+
+@code {
+    private Funcion funcion = new();
+    private FuncionForm? funcionForm;
+
+    [Parameter]
+    public int PeliculaId { get; set; }
+
+    private async Task CreateAsync()
+    {
+        funcion.PeliculaId = PeliculaId;
+        var httpResponse = await repository.Post("/api/funciones", funcion);
+        if (httpResponse.Error)
+        {
+            var message = await httpResponse.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        Return();
+    }
+
+    private void Return()
+    {
+        funcionForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo($"/pelicula/details/{PeliculaId}");
+    }
+}

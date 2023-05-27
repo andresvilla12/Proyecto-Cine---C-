@@ -1,0 +1,219 @@
+﻿@page "/Register"
+@using Cine.Shared.DTOs;
+@using Cine.Shared.Enums;
+@using Cine.WEB.Auth;
+@using Cine.Web.Repositories;
+@using cine.Shared.DTOs;
+@using Cine.Web.Shared;
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+@inject ILoginService loginService
+
+<h3>Registrar Nuevo Usuario</h3>
+
+<EditForm Model="userDTO" OnValidSubmit="CreateUserAsync">
+    <DataAnnotationsValidator />
+
+        <div class="card">
+        <div class="card-header">
+            <span>
+                <i class="oi oi-person" /> Registrar Nuevo  Usuario
+                <button class="btn btn-sm btn-primary float-end" type="submit"><i class="oi oi-check" /> Registrar</button>
+            </span>
+        </div>
+        <div class="card-body">
+
+
+
+    <div class="row">
+        <div class="col-6">
+            <div class="mb-3">
+                <label>Nombres:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@userDTO.FirstName" />
+                    <ValidationMessage For="@(() => userDTO.FirstName)" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Apellidos:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@userDTO.LastName" />
+                    <ValidationMessage For="@(() => userDTO.LastName)" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Documento:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@userDTO.Document" />
+                    <ValidationMessage For="@(() => userDTO.Document)" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Teléfono:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@userDTO.PhoneNumber" />
+                    <ValidationMessage For="@(() => userDTO.PhoneNumber)" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Dirección:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@userDTO.Address" />
+                    <ValidationMessage For="@(() => userDTO.Address)" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Email:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@userDTO.Email" />
+                    <ValidationMessage For="@(() => userDTO.Email)" />
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+
+            <div class="mb-3">
+                <label>Departamento:</label>
+                <div>
+                    <select class="form-select" @onchange="ColombiaChangedAsync">
+                        <option value="0">-- Seleccione un departamento --</option>
+                        @if (colombia is not null)
+                        {
+                            @foreach (var colombia in colombia)
+                            {
+                                <option value="@colombia.Id">@colombia.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+          
+            <div class="mb-3">
+                <label>Ciudad:</label>
+                <div>
+                    <select class="form-select" @bind="userDTO.CiudadId">
+                        <option value="0">-- Seleccione una ciudad --</option>
+                        @if (ciudad is not null)
+                        {
+                            @foreach (var ciudad in ciudad)
+                            {
+                                <option value="@ciudad.Id">@ciudad.Name</option>
+                            }
+                        }
+                    </select>
+                    <ValidationMessage For="@(() => userDTO.CiudadId)" />
+                </div>
+            </div>
+
+           
+
+
+            <div class="mb-3">
+                <label>Foto:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@userDTO.Photo" />
+                    <ValidationMessage For="@(() => userDTO.Photo)" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Contraseña:</label>
+                <div>
+                    <InputText type="password" class="form-control" @bind-Value="@userDTO.Password" />
+                    <ValidationMessage For="@(() => userDTO.Password)" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Confirmación de contraseña:</label>
+                <div>
+                    <InputText type="password" class="form-control" @bind-Value="@userDTO.PasswordConfirm" />
+                    <ValidationMessage For="@(() => userDTO.PasswordConfirm)" />
+                </div>
+            </div>
+
+                </div>
+                   <div class="mb-3">
+                   <InputImg Label="Foto" ImageSelected="ImageSelected" ImageURL="@imageUrl" />
+                   </div>
+
+        
+    </div>
+        </div>
+    </div>
+
+</EditForm>
+
+@code {
+    private UserDTO userDTO = new();
+
+    private List<Colombia>? colombia;
+    private List<Ciudad>? ciudad;
+    private string? imageUrl;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadColombiaAsync();
+
+        if (!string.IsNullOrEmpty(userDTO.Photo))
+        {
+            imageUrl = userDTO.Photo;
+            userDTO.Photo = null;
+        }
+    }
+    private void ImageSelected(string imagenBase64)
+    {
+        userDTO.Photo = imagenBase64;
+        imageUrl = null;
+    }
+
+
+    private async Task ColombiaChangedAsync(ChangeEventArgs e)
+    {
+        var selectedColombia = Convert.ToInt32(e.Value!);
+        await LoadCiudadAsyn(selectedColombia);
+    }
+
+    private async Task LoadColombiaAsync()
+    {
+        var responseHttp = await repository.Get<List<Colombia>>("/api/colombia/combo");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        colombia = responseHttp.Response;
+    }
+
+    private async Task LoadCiudadAsyn(int colombiaId)
+    {
+        var responseHttp = await repository.Get<List<Ciudad>>($"/api/ciudad/combo/{colombiaId}");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        ciudad = responseHttp.Response;
+    }
+
+
+    private async Task CreateUserAsync()
+    {
+        userDTO.UserName = userDTO.Email;
+        userDTO.UserType = UserType.User;
+        var responseHttp = await repository.Post<UserDTO, TokenDTO>("/api/accounts/CreateUser", userDTO);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        await loginService.LoginAsync(responseHttp.Response!.Token);
+        navigationManager.NavigateTo("/");
+    }
+}

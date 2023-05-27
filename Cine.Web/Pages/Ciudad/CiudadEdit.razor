@@ -1,0 +1,66 @@
+﻿@using Cine.Shared.Entities;
+@page "/ciudad/edit/{CiudadId:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+@using System.Net;
+@using Cine.Web.Repositories;
+
+
+<h3>Editar Ciudad</h3>
+
+@if (ciudad is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <CiudadForm @ref="ciudadForm" ciudad="ciudad" OnValidSubmit="EditAsync" ReturnAction="Return" />
+}
+
+@code {
+    private Ciudad? ciudad;
+    private CiudadForm? ciudadForm;
+
+    [Parameter]
+    public int CiudadId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var responseHttp = await repository.Get<Ciudad>($"/api/ciudad/{CiudadId}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/colombia");
+                return;
+            }
+
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+          ciudad = responseHttp.Response;
+    }
+
+    private async Task EditAsync()
+    {
+        var responseHttp = await repository.Put("/api/ciudad", ciudad);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        Return();
+    }
+
+    private void Return()
+    {
+        ciudadForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo($"/Colombia/details/{ciudad!.ColombiaId}");
+    }
+}

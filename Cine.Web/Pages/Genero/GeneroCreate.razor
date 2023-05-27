@@ -1,0 +1,35 @@
+﻿@page "/genero/create"
+@using Cine.Web.Repositories;
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Agregar Genero</h3>
+
+<GeneroForm @ref="generoForm" Genero="genero" OnValidSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private Genero genero = new();
+    private GeneroForm? generoForm;
+
+    private async Task Create()
+    {
+        var httpResponse = await repository.Post("api/genero", genero);
+
+        if (httpResponse.Error)
+        {
+            var mensajeError = await httpResponse.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+        }
+        else
+        {
+            generoForm!.FormPostedSuccessfully = true;
+            navigationManager.NavigateTo("genero");
+        }
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("genero");
+    }
+}

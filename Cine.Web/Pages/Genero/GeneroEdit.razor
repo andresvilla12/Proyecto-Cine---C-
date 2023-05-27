@@ -1,0 +1,66 @@
+﻿@page "/genero/edit/{Id:int}"
+@using Cine.Web.Repositories;
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService swal
+<h3>Editar Genero</h3>
+
+@if (genero is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <GeneroForm @ref="generoForm" Genero="genero" OnValidSubmit="Edit" ReturnAction="Return" />
+}
+
+@code {
+    private Genero? genero;
+    private GeneroForm? generoForm;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var responseHTTP = await repository.Get<Genero>($"api/genero/{Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("genero");
+            }
+            else
+            {
+                var messageError = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", messageError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            genero = responseHTTP.Response;
+        }
+    }
+
+    private async Task Edit()
+    {
+        var responseHTTP = await repository.Put("api/genero", genero);
+
+        if (responseHTTP.Error)
+        {
+            var mensajeError = await responseHTTP.GetErrorMessageAsync();
+            await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+        }
+        else
+        {
+            generoForm!.FormPostedSuccessfully = true;
+            navigationManager.NavigateTo("genero");
+        }
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("genero");
+    }
+}

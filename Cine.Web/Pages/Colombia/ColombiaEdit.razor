@@ -1,0 +1,66 @@
+﻿@page "/colombia/edit/{Id:int}"
+@using Cine.Web.Repositories;
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService swal
+<h3>Editar Départamento</h3>
+
+@if (colombia is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <ColombiaForm @ref="colombiaForm" Colombia="colombia" OnValidSubmit="Edit" ReturnAction="Return" />
+}
+
+@code {
+    private Colombia? colombia;
+    private ColombiaForm? colombiaForm;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var responseHTTP = await repository.Get<Colombia>($"api/colombia/{Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("colombia");
+            }
+            else
+            {
+                var messageError = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", messageError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            colombia = responseHTTP.Response;
+        }
+    }
+
+    private async Task Edit()
+    {
+        var responseHTTP = await repository.Put("api/colombia", colombia);
+
+        if (responseHTTP.Error)
+        {
+            var mensajeError = await responseHTTP.GetErrorMessageAsync();
+            await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+        }
+        else
+        {
+            colombiaForm!.FormPostedSuccessfully = true;
+            navigationManager.NavigateTo("colombia");
+        }
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("colombia");
+    }
+}

@@ -1,0 +1,196 @@
+﻿@page "/genero"
+@using Cine.Web.Repositories;
+@using Microsoft.AspNetCore.Authorization;
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+@attribute [Authorize(Roles = "Admin")]
+
+<h3>Generos</h3>
+
+
+<div class="mb-2" style="display: flex; flex-wrap:wrap; align-items: center;">
+    <div class="mb-3">
+        <a class="btn btn-primary" href="/genero/create">Nuevo genero/peliculas</a>
+    </div>
+    <div class="mx-2">
+        <input style="width: 400px;" type="text" class="form-control" id="titulo" placeholder="Buscar genero..." @bind-value="Filter" />
+    </div>
+    <div>
+        <button type="button" class="btn btn-outline-primary" @onclick="ApplyFilterAsync">Filtrar</button>
+        <button type="button" class="btn btn-outline-danger" @onclick="CleanFilterAsync">Limpiar</button>
+    </div>
+</div>
+<Pagination CurrentPage="currentPage"
+            TotalPages="totalPages"
+            SelectedPage="SelectedPage" />
+
+
+
+<GenericList MyList="Genero">
+
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th style="width:220px">Genero</th>
+                    <th style="width:450px"></th>
+
+                    <th></th>
+                    
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var genero in Genero!)
+                {
+                    <tr>
+
+
+
+                        <td>
+                            @genero.Name
+                        </td>
+                        <td>
+                            @genero.PeliculaNumber
+                        </td>
+
+
+
+                        <td>
+                            <a href="/genero/details/@genero.Id" class="btn btn-info"><i class="oi oi-play-circle" /> Ver peliculas</a>
+                            <a href="/genero/edit/@genero.Id" class="btn btn-warning"><i class="oi oi-pencil" />Editar</a>
+                            <button class="btn btn-danger" @onclick=@(() => Delete(genero))><i class="oi oi-trash" />Borrar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </Body>
+
+</GenericList>
+
+@code {
+    public List<Genero>? Genero { get; set; }
+    private int currentPage = 1;
+    private int totalPages;
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string Page { get; set; } = "";
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string Filter { get; set; } = "";
+
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        currentPage = page;
+        await Load(page);
+    }
+
+
+    private async Task Load(int page = 1)
+    {
+
+        if (!string.IsNullOrWhiteSpace(Page))
+        {
+            page = Convert.ToInt32(Page);
+        }
+
+        string url1 = string.Empty;
+        string url2 = string.Empty;
+
+        if (string.IsNullOrEmpty(Filter))
+        {
+            url1 = $"api/genero?page={page}";
+            url2 = $"api/genero/totalPages";
+        }
+        else
+        {
+            url1 = $"api/genero?page={page}&filter={Filter}";
+            url2 = $"api/genero/totalPages?filter={Filter}";
+        }
+
+         
+        try
+        {
+            var responseHppt = await repository.Get<List<Genero>>(url1);
+            var responseHppt2 = await repository.Get<int>(url2);
+            Genero = responseHppt.Response!;
+            totalPages = responseHppt2.Response!;
+
+        }
+        catch (Exception ex)
+        {
+
+            await sweetAlertService.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
+        }
+
+
+
+    }
+
+
+    private async Task Delete(Genero genero)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Esta seguro que quieres borrar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHTTP = await repository.Delete($"api/genero/{genero.Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var mensajeError = await responseHTTP.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+        }
+       
+        
+            await Load();
+        }
+
+        private async Task CleanFilterAsync()
+        {
+            Filter = string.Empty;
+            await ApplyFilterAsync();
+        }
+
+        private async Task ApplyFilterAsync()
+        {
+            int page = 1;
+            await Load(page);
+            await SelectedPage(page);
+        }
+
+    }
+
+
+

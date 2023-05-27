@@ -1,0 +1,39 @@
+﻿@page "/ciudad/create/{ColombiaId:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+@using Cine.Web.Repositories;
+@using Cine.Shared.Entities;
+
+
+<h3>Crear Ciudad</h3>
+
+<CiudadForm @ref="ciudadForm" ciudad="ciudad" OnValidSubmit="CreateAsync" ReturnAction="Return" />
+
+@code {
+    private Ciudad ciudad = new();
+    private CiudadForm? ciudadForm;
+
+    [Parameter]
+    public int ColombiaId { get; set; }
+
+    private async Task CreateAsync()
+    {
+        ciudad.ColombiaId = ColombiaId;
+        var httpResponse = await repository.Post("/api/ciudad", ciudad);
+        if (httpResponse.Error)
+        {
+            var message = await httpResponse.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        Return();
+    }
+
+    private void Return()
+    {
+        ciudadForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo($"/colombia/details/{ColombiaId}");
+    }
+}

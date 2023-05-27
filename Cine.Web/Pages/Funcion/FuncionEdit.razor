@@ -1,0 +1,65 @@
+﻿@page "/funciones/edit/{FuncionId:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+@using Cine.Shared.Entities;
+@using System.Net;
+@using Cine.Web.Repositories;
+
+<h3>Editar Funcion</h3>
+
+@if (funcion is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <FuncionForm @ref="funcionForm" funcion="funcion" OnValidSubmit="EditAsync" ReturnAction="Return" />
+}
+
+@code {
+    private Funcion? funcion;
+    private FuncionForm? funcionForm;
+
+    [Parameter]
+    public int FuncionId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var responseHttp = await repository.Get<Funcion>($"/api/funciones/{FuncionId}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/genero");
+                return;
+            }
+
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        funcion = responseHttp.Response;
+    }
+
+    private async Task EditAsync()
+    {
+        var responseHttp = await repository.Put("/api/funciones", funcion);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        Return();
+    }
+
+    private void Return()
+    {
+        funcionForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo($"/Pelicula/details/{funcion!.PeliculaId}");
+    }
+}

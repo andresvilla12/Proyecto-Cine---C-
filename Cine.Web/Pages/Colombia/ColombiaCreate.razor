@@ -1,0 +1,35 @@
+﻿@page "/colombia/create"
+@using Cine.Web.Repositories;
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Agregar Departamento</h3>
+
+<ColombiaForm @ref="colombiaForm" Colombia="colombia" OnValidSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private Colombia colombia = new();
+    private ColombiaForm? colombiaForm;
+
+    private async Task Create()
+    {
+        var httpResponse = await repository.Post("api/colombia", colombia);
+
+        if (httpResponse.Error)
+        {
+            var mensajeError = await httpResponse.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+        }
+        else
+        {
+            colombiaForm!.FormPostedSuccessfully = true;
+            navigationManager.NavigateTo("colombia");
+        }
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("colombia");
+    }
+}
