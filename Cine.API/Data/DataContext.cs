@@ -17,6 +17,8 @@ namespace Cine.API.Data
 
         public DbSet<Pelicula> Pelicula { get; set; }
 
+        public DbSet<Owner> Owners { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
