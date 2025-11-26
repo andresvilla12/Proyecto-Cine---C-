@@ -154,10 +154,14 @@ namespace Cine.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("combo")]
-        public async Task<ActionResult> GetCombo()
+        [HttpGet("Combo")]
+        public async Task<ActionResult<List<string>>> GetCombo()
         {
-            return Ok(await _context.Colombia.ToListAsync());
+            // return Ok(await _context.Colombia.ToListAsync()); // <-- COMENTAR ESTA LÍNEA
+
+            // Devolver una lista fija (Mock data) para que la API funcione
+            var listaFija = new List<string> { "Dato CI/CD 1", "Dato CI/CD 2" };
+            return Ok(listaFija); // <-- USAR ESTA LÍNEA
         }
 
 

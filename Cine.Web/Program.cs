@@ -12,7 +12,8 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7151/") });
+//builder.Services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri("https://cineapii-ashyg6ffhah7g3b9.canadacentral-01.azurewebsites.net") });
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://cineapii-ashyg6ffhah7g3b9.canadacentral-01.azurewebsites.net") });
 builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddSweetAlert2();
 builder.Services.AddAuthorizationCore();

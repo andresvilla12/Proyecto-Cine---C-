@@ -1,13 +1,182 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Authorization
 
-<PageTitle>Index</PageTitle>
-<AuthorizeView Roles="Admin">
-    <Authorized>
-        <p>Estas autenticado y autorizado, @context.User.Identity?.Name</p>
-    </Authorized>
-    <NotAuthorized>
-        <p>No estas autorizado</p>
-    </NotAuthorized>
-</AuthorizeView>
+<PageTitle>Cartelera - Tickets Cine</PageTitle>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f2f5;
+        margin: 0;
+        padding: 0;
+    }
+
+    .header {
+        background-color: #007bff; /* Azul vibrante */
+        color: white;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+    .container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    h2 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2em;
+    }
+
+    .peliculas-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+        justify-content: center;
+    }
+
+    .pelicula-card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        width: 300px;
+        background-color: white;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        overflow: hidden;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+        .pelicula-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .pelicula-card img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+    .card-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 150px; /* Para mantener la altura consistente */
+    }
+
+        .card-body h3 {
+            color: #007bff;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .card-body p {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+    .btn-comprar {
+        background-color: #28a745; /* Verde compra */
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 15px;
+        font-size: 1.1em;
+        font-weight: bold;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+        .btn-comprar:hover {
+            background-color: #218838; /* Verde más oscuro al pasar el ratón */
+        }
+
+    .footer-info {
+        text-align: center;
+        padding: 25px;
+        margin-top: 50px;
+        background-color: #343a40; /* Gris oscuro */
+        color: #f8f9fa; /* Texto claro */
+        border-top: 1px solid #495057;
+        font-size: 0.9em;
+    }
+</style>
+
+<header class="header">
+    <h1>Tickets Cine - Cartelera Principal</h1>
+    <p>¡Explora las últimas novedades del mundo del desarrollo y la tecnología!</p>
+</header>
+
+<div class="container">
+
+    <h2>En Cartelera Ahora</h2>
+    <div class="peliculas-grid">
+
+        @* Tarjeta de Película 1: El Misterio del Código *@
+        <div class="pelicula-card">
+            <img src="https://picsum.photos/300/400?random=1" alt="Póster de El Misterio del Código" />
+            <div class="card-body">
+                <h3>El Misterio del Código</h3>
+                <p><strong>Género:</strong> Thriller / Ciencia Ficción</p>
+                <p>Una épica aventura sobre el desarrollo de software y la ciberseguridad.</p>
+                <button class="btn-comprar">Comprar Entradas</button>
+            </div>
+        </div>
+
+        @* Tarjeta de Película 2: La Migración 9.0 *@
+        <div class="pelicula-card">
+            <img src="https://picsum.photos/300/400?random=2" alt="Póster de La Migración 9.0" />
+            <div class="card-body">
+                <h3>La Migración 9.0</h3>
+                <p><strong>Género:</strong> Documental / Drama</p>
+                <p>Un film crucial sobre la actualización de sistemas a .NET Core.</p>
+                <button class="btn-comprar">Comprar Entradas</button>
+            </div>
+        </div>
+
+        @* Tarjeta de Película 3: El Último Despliegue *@
+        <div class="pelicula-card">
+            <img src="https://picsum.photos/300/400?random=33" alt="Póster de El Último Despliegue" />
+            <div class="card-body">
+                <h3>El Último Despliegue</h3>
+                <p><strong>Género:</strong> Acción / CI/CD</p>
+                <p>El equipo lucha contra los errores de compilación para lograr el despliegue final.</p>
+                <button class="btn-comprar">Comprar Entradas</button>
+            </div>
+        </div>
+
+        @* Tarjeta de Película 4: ¡NUEVA! El Ciclo de Vida del Software *@
+        <div class="pelicula-card">
+            <img src="https://picsum.photos/300/400?random=44" alt="Póster de El Ciclo de Vida del Software" />
+            <div class="card-body">
+                <h3>El Ciclo de Vida del Software</h3>
+                <p><strong>Género:</strong> Educativo / Tech</p>
+                <p>Un recorrido fascinante por todas las etapas del desarrollo de una aplicación.</p>
+                <button class="btn-comprar">Comprar Entradas</button>
+            </div>
+        </div>
+
+    </div>
+
+    <hr style="margin-top: 50px; border-color: #e0e0e0;">
+
+</div>
 
