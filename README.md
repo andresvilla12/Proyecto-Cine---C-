@@ -11,4 +11,19 @@ con despliegue final en Microsoft Azure.
 
 3- Luisa Fernanda Quiroz Garcia
 
-4- Andrés Felipe Villa Calderónn
+4- Andrés Felipe Villa Calderón
+
+
+# Evidencias - CAPTURAS:
+
+[Evidencias (CAPTURAS) -ENTREGA FINAL DESPLIEGUE.pdf](https://github.com/user-attachments/files/23813214/Evidencias.CAPTURAS.-ENTREGA.FINAL.DESPLIEGUE.pdf)
+
+# Link videos:
+
+Parte 1:
+
+https://www.youtube.com/watch?v=RYejp--mP-Q&feature=youtu.be
+
+Parte 2:
+
+https://www.youtube.com/watch?v=pXF1SPXA2Y4
